@@ -45,7 +45,6 @@ def start(update, context):
 
 def new_question(update, context):
     questions = context.bot_data['questions']
-    questions_and_answers = context.bot_data['questions_and_answers']
     db_connection = context.bot_data['redis_connection']
 
     message = choice(questions)
@@ -56,11 +55,11 @@ def new_question(update, context):
 
 
 def check_answer(update, context):
-    questions_and_answers = context.bot_data['questions_and_answers']
+    answers = context.bot_data['answers']
     db_connection = context.bot_data['redis_connection']
 
     question = db_connection.get(update.message.chat.id)
-    answer = questions_and_answers.get(question)
+    answer = answers.get(question)
 
     if answer.lower() == update.message.text.lower():
         message = 'Правильно! Поздравляю! '
@@ -78,13 +77,13 @@ def check_answer(update, context):
     return state
 
 
-def to_surrender(update, context):
+def surrender(update, context):
     questions = context.bot_data['questions']
-    questions_and_answers = context.bot_data['questions_and_answers']
+    answers = context.bot_data['answers']
     db_connection = context.bot_data['redis_connection']
 
     question = db_connection.get(update.message.chat.id)
-    answer = questions_and_answers.get(question)
+    answer = answers.get(question)
     update.message.reply_text(answer)
 
     message = choice(questions)
@@ -119,7 +118,7 @@ def main():
     env.read_env()
     tg_token = env('TG_TOKEN')
 
-    questions, questions_and_answers = get_questions_and_answers()
+    questions, answers = get_questions_and_answers()
 
     updater = Updater(tg_token)
     dp = updater.dispatcher
@@ -133,7 +132,7 @@ def main():
             ],
 
             ATTEMPT: [
-                MessageHandler(Filters.regex('Сдаться'), to_surrender),
+                MessageHandler(Filters.regex('Сдаться'), surrender),
                 MessageHandler(Filters.text, check_answer)
             ]
         },
@@ -157,7 +156,7 @@ def main():
     )
 
     dp.bot_data['questions'] = questions
-    dp.bot_data['questions_and_answers'] = questions_and_answers
+    dp.bot_data['answers'] = answers
     dp.bot_data['redis_connection'] = redis_connection
 
     updater.start_polling()

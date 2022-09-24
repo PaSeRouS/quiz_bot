@@ -36,21 +36,21 @@ def parse_questions(filename):
     return questions, answers
 
 
-def append_answers_to_all(parsed_answers, all_answers):
-    all_answers.update(parsed_answers)
-    return all_answers
+def append_answers_to_all(parsed_answers, answers):
+    answers.update(parsed_answers)
+    return answers
 
 
-def append_questions_to_all(parsed_questions, all_questions):
+def append_questions_to_all(parsed_questions, questions):
     for question in parsed_questions:
-        all_questions.append(question)
+        questions.append(question)
 
-    return all_questions
+    return questions
 
 
 def get_questions_and_answers():
-    all_questions = []
-    all_answers = {}
+    questions = []
+    answers = {}
 
     files = listdir("quiz-questions")
 
@@ -59,7 +59,7 @@ def get_questions_and_answers():
             f"quiz-questions/{file}"
         )
         
-        all_questions = append_questions_to_all(parsed_questions, all_questions)
-        all_answers = append_answers_to_all(parsed_answers, all_answers)
+        questions = append_questions_to_all(parsed_questions, questions)
+        answers = append_answers_to_all(parsed_answers, answers)
 
-    return all_questions, all_answers
+    return questions, answers

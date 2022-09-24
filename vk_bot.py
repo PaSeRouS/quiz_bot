@@ -49,7 +49,7 @@ def quiz_handler(event, vk_api, questions, questions_and_answers, quiz_db):
             send_message(event, vk_api, message)
 
 if __name__ == "__main__":
-    questions, questions_and_answers = get_questions_and_answers()
+    questions, answers = get_questions_and_answers()
 
     env = Env()
     env.read_env()
@@ -82,5 +82,5 @@ if __name__ == "__main__":
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
             quiz_handler(
-                event, vk_api, questions, questions_and_answers, db_connection
+                event, vk_api, questions, answers, db_connection
             )
