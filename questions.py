@@ -1,3 +1,5 @@
+from os import listdir
+
 def parse_questions(filename):
     questions = []
     answers = {}
@@ -50,52 +52,14 @@ def get_questions_and_answers():
     all_questions = []
     all_answers = {}
 
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/1vs1200.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
+    files = listdir("quiz-questions")
 
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/1vs1201.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/1vs1298.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/1vs1299.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/anime10.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/futb11br.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/futb11ch.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
-
-    parsed_questions, parsed_answers = parse_questions(
-        "quiz-questions/futb11ek.txt"
-    )
-    all_questions = append_questions_to_all(parsed_questions, all_questions)
-    all_answers = append_answers_to_all(parsed_answers, all_answers)
+    for file in files:
+        parsed_questions, parsed_answers = parse_questions(
+            f"quiz-questions/{file}"
+        )
+        
+        all_questions = append_questions_to_all(parsed_questions, all_questions)
+        all_answers = append_answers_to_all(parsed_answers, all_answers)
 
     return all_questions, all_answers
