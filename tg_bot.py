@@ -1,15 +1,13 @@
 import logging
 from random import choice
 
-import redis
 from environs import Env
+from redis import Redis
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.ext import CallbackContext, ConversationHandler
 
-from db_functions import get_connection, get_question_by_user_id
-from db_functions import record_question_to_db
-from questions_function import get_questions_and_answers
+from questions import get_questions_and_answers
 
 
 logging.basicConfig(
@@ -51,7 +49,7 @@ def new_question(update, context):
     db_connection = context.bot_data['redis_connection']
 
     message = choice(questions)
-    record_question_to_db(update.message.chat.id, message, db_connection)
+    db_connection.set(update.message.chat.id, message)
     update.message.reply_text(message)
 
     return ATTEMPT
@@ -61,7 +59,7 @@ def check_answer(update, context):
     questions_and_answers = context.bot_data['questions_and_answers']
     db_connection = context.bot_data['redis_connection']
 
-    question = get_question_by_user_id(update.message.chat.id, db_connection)
+    question = db_connection.get(update.message.chat.id)
     answer = questions_and_answers.get(question)
 
     if answer.lower() == update.message.text.lower():
@@ -85,12 +83,12 @@ def to_surrender(update, context):
     questions_and_answers = context.bot_data['questions_and_answers']
     db_connection = context.bot_data['redis_connection']
 
-    question = get_question_by_user_id(update.message.chat.id, db_connection)
+    question = db_connection.get(update.message.chat.id)
     answer = questions_and_answers.get(question)
     update.message.reply_text(answer)
 
     message = choice(questions)
-    record_question_to_db(update.message.chat.id, message, db_connection)
+    db_connection.set(update.message.chat.id, message)
 
     if message:
         update.message.reply_text(
@@ -144,9 +142,19 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    dp.add_error_handler(error)\
+    dp.add_error_handler(error)
 
-    redis_connection = get_connection()
+    redis_host = env('REDIS_HOST')
+    redis_port = env('REDIS_PORT')
+    redis_password = env('REDIS_PASSWORD')
+
+    redis_connection = Redis(
+        host=redis_host,
+        port=redis_port,
+        db=0,
+        password=redis_password,
+        decode_responses=True
+    )
 
     dp.bot_data['questions'] = questions
     dp.bot_data['questions_and_answers'] = questions_and_answers

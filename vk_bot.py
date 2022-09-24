@@ -2,12 +2,11 @@ from random import choice, randint
 
 import vk_api as vk
 from environs import Env
+from redis import Redis
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkLongPoll, VkEventType
 
-from db_functions import get_connection, get_question_by_user_id
-from db_functions import record_question_to_db
-from questions_function import get_questions_and_answers
+from questions import get_questions_and_answers
 
 
 def send_message(event, vk_api, message):
@@ -22,22 +21,22 @@ def send_message(event, vk_api, message):
 def quiz_handler(event, vk_api, questions, questions_and_answers, quiz_db):
     if event.text == 'Новый вопрос':
         message = choice(questions)
-        record_question_to_db(event.user_id, message, quiz_db)
+        quiz_db.set(event.user_id, message)
         send_message(event, vk_api, message)
     elif event.text == 'Сдаться':
-        question = get_question_by_user_id(event.user_id, quiz_db)
+        question = quiz_db.get(event.user_id)
         answer = questions_and_answers.get(question)
         message = 'Вот правильный ответ: ' + answer
         send_message(event, vk_api, message)
 
         message = choice(questions)
-        record_question_to_db(event.user_id, message, quiz_db)
+        quiz_db.set(event.user_id, message)
         send_message(event, vk_api, message)
     elif event.text == 'Привет':
         message = 'Приветствуем тебя в нашей викторине! Нажми «Новый вопрос».'
         send_message(event, vk_api, message)
     else:
-        question = get_question_by_user_id(event.user_id, quiz_db)
+        question = quiz_db.get(event.user_id)
         answer = questions_and_answers.get(question)
 
         if answer:
@@ -51,10 +50,21 @@ def quiz_handler(event, vk_api, questions, questions_and_answers, quiz_db):
 
 if __name__ == "__main__":
     questions, questions_and_answers = get_questions_and_answers()
-    db_connection = get_connection()
 
     env = Env()
     env.read_env()
+
+    redis_host = env('REDIS_HOST')
+    redis_port = env('REDIS_PORT')
+    redis_password = env('REDIS_PASSWORD')
+
+    db_connection = Redis(
+        host=redis_host,
+        port=redis_port,
+        db=0,
+        password=redis_password,
+        decode_responses=True
+    )
 
     vk_token = env('VK_TOKEN')
     vk_session = vk.VkApi(token=vk_token)
