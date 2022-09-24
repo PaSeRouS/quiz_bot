@@ -10,11 +10,6 @@ from telegram.ext import CallbackContext, ConversationHandler
 from questions import get_questions_and_answers
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-
 logger = logging.getLogger(__name__)
 
 QUESTION, ATTEMPT = range(2)
@@ -114,6 +109,11 @@ def error(bot, update, error):
 
 
 def main():
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+
     env = Env()
     env.read_env()
     tg_token = env('TG_TOKEN')
