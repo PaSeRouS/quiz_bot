@@ -43,7 +43,7 @@ def start(update, context):
     return QUESTION
 
 
-def new_question(update, context):
+def send_new_question(update, context):
     questions = context.bot_data['questions']
     db_connection = context.bot_data['redis_connection']
 
@@ -128,7 +128,7 @@ def main():
 
         states={
             QUESTION: [
-                MessageHandler(Filters.regex('Новый вопрос'), new_question)
+                MessageHandler(Filters.regex('Новый вопрос'), send_new_question)
             ],
 
             ATTEMPT: [
